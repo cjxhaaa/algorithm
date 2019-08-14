@@ -2,8 +2,9 @@ package quicksort
 
 import (
 	"algorithm/mysort/insertsort"
-	"math/rand"
 )
+
+const cutOff = 3
 
 /*
 	类似归并排序，快速排序也是分治递归。
@@ -28,9 +29,6 @@ import (
 	3.对分开后的两个数组继续先取一个p，重复1,2,递归实现排序，到每个排序的数组len为0或1时，结束排序。
 
 */
-
-const cutOff = 3
-
 func QuickSort(A []int) {
 	qsort(A, 0, len(A) - 1)
 }
@@ -41,10 +39,27 @@ func qsort(A []int, left, right int) {
 	}
 
 	if right - left < cutOff {
-		p := A[rand.Intn(len(A))]
+		p := median3(A, left, right)
+		i, j := left + 1, right - 2
+		for {
+			for A[i] < p {
+				i++
+			}
+			for A[j] > p {
+				j--
+			}
+			if i < j {
+				A[i], A[j] = A[j], A[i]
+			} else {
+				break
+			}
 
+		}
+		A[i], A[right - 1] = A[right - 1], A[i]
+		qsort(A, left, i - 1)
+		qsort(A, right + 1, right)
 
-	} else {  // 子集数量太少使用插入排序
+	} else {  // 子集数量太少使用插入排序优化
 		insertsort.InsertSort(A[left: right-left + 1])
 	}
 
@@ -56,7 +71,7 @@ func qsort(A []int, left, right int) {
 	将三元素排序后，取A[center]的值为枢纽元，目前已知条件是A[left]<A[center]<A[right]
 	所以将A[center]的值与A[right-1]交换，将i,j初始化为left+1,right-2
 */
-func median3(A []int, left,right int)  {
+func median3(A []int, left,right int) int  {
 	center := (left + right) / 2
 
 	if A[left] > A[center] {
@@ -69,6 +84,6 @@ func median3(A []int, left,right int)  {
 		A[center], A[right] = A[right], A[center]
 	}
 
-
-
+	A[center], A[right - 1] = A[right - 1], A[center]
+	return A[right - 1]
 }
