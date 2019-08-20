@@ -39,6 +39,10 @@ func QuickSort_GO(A []int) {
 	<-done
 }
 
+func QuickSort2(A []int) {
+	qsort2(A, 0, len(A) - 1)
+}
+
 func qsort(A []int, left, right int) {
 	if len(A) <= 1 {
 		return
@@ -169,4 +173,33 @@ func qsort_go(A []int, left, right int, done chan struct{}, depth int) {
 		insertsort.InsertSort(A[left:], right-left+1)
 	}
 	done <- struct{}{}
+}
+
+func qsort2(A []int, left, right int) {
+	if len(A) <= 1 {
+		return
+	}
+
+	if right - left >= cutOff {
+		p := partition(A, left, right)
+		qsort2(A, left, p-1)
+		qsort2(A, p+1, right)
+
+	} else {  // 子集数量太少使用插入排序优化
+		insertsort.InsertSort(A[left:], right-left+1)
+	}
+
+}
+
+func partition(a []int, lo, hi int) int {
+	pivot := a[hi]
+	i := lo - 1
+	for j := lo; j < hi; j++ {
+		if a[j] < pivot {
+			i++
+			a[j], a[i] = a[i], a[j]
+		}
+	}
+	a[i+1], a[hi] = a[hi], a[i+1]
+	return i + 1
 }
