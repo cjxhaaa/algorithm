@@ -51,7 +51,6 @@ func qsort(A []int, left, right int) {
 	if right - left >= cutOff {
 		p := median3(A, left, right)
 		pv := A[p]
-		//i := arrange(A, left+1, right - 1, p)
 		i,j := left, right
 		for i <= j {
 			for j >= p && A[j] > pv {
@@ -71,15 +70,8 @@ func qsort(A []int, left, right int) {
 			}
 		}
 		A[p] = pv
-		//A[i], A[right-1] = A[right-1], A[i]   // 将i, j 相交点与p交换，这时数组A中，A[i] 左侧的数都比p小，右侧数都比p大
-		if p - left > 1 {
-			qsort(A, left, p - 1)
-		}
-
-		if right - p > 1 {
-			qsort(A, p + 1, right)
-		}
-
+		qsort(A, left, p - 1)
+		qsort(A, p + 1, right)
 
 	} else {  // 子集数量太少使用插入排序优化
 		insertsort.InsertSort(A[left:], right-left+1)
@@ -91,7 +83,6 @@ func qsort(A []int, left, right int) {
 	三值分割法。
 	取三元素A[left],A[center],A[right]
 	将三元素排序后，取A[center]的值为枢纽元，目前已知条件是A[left]<A[center]<A[right]
-	所以将A[center]的值与A[right-1]交换，将i,j初始化为left+1,right-2
 */
 func median3(A []int, left,right int) int  {
 	center := (left + right) / 2
@@ -123,7 +114,6 @@ func qsort_go(A []int, left, right int, done chan struct{}, depth int) {
 		depth--
 		p := median3(A, left, right)
 		pv := A[p]
-		//i := arrange(A, left+1, right - 1, p)
 		i,j := left, right
 		for i <= j {
 			for j >= p && A[j] > pv {
@@ -143,7 +133,6 @@ func qsort_go(A []int, left, right int, done chan struct{}, depth int) {
 			}
 		}
 		A[p] = pv
-		//A[i], A[right-1] = A[right-1], A[i]   // 将i, j 相交点与p交换，这时数组A中，A[i] 左侧的数都比p小，右侧数都比p大
 
 		if  depth > 0 {
 			childDone := make(chan struct{}, 2)
