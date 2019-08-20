@@ -194,7 +194,7 @@ func qsort2(A []int, left, right int) {
 func partition(a []int, lo, hi int) int {
 	pivot := a[hi]
 	i := lo - 1
-	for j := lo; j < hi; j++ {   // 这里其实就是个偷懒的插排，垃圾
+	for j := lo; j < hi; j++ {   // 这里其实就是个偷懒的冒泡，每次把两个大的元素往后调，垃圾
 		if a[j] < pivot {
 			i++
 			a[j], a[i] = a[i], a[j]
