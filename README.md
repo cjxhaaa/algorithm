@@ -5,13 +5,13 @@
 
 1. qsort基本版
 ```$xslt
+// 100个数
 goos: darwin
 goarch: amd64
 pkg: algorithm/mysort/quicksort
 BenchmarkQuickSort-4   	 1000000	      1113 ns/op
 PASS
-
-
+// 10000个数
 goos: darwin
 goarch: amd64
 pkg: algorithm/mysort/quicksort
@@ -21,12 +21,13 @@ PASS
 
 2.qsort代码简洁版
 ```$xslt
+// 100个数
 goos: darwin
 goarch: amd64
 pkg: algorithm/mysort/quicksort
 BenchmarkQuickSort2-4   	  200000	      8618 ns/op
 PASS
-
+// 10000个数
 goos: darwin
 goarch: amd64
 pkg: algorithm/mysort/quicksort
@@ -36,12 +37,13 @@ PASS
 
 3. qsort并发版
 ```$xslt
+// 100个数
 goos: darwin
 goarch: amd64
 pkg: algorithm/mysort/quicksort
 BenchmarkQuickSort3-4   	  100000	     20526 ns/op
 PASS
-
+// 10000个数
 goos: darwin
 goarch: amd64
 pkg: algorithm/mysort/quicksort
