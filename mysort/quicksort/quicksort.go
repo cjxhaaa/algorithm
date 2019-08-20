@@ -19,7 +19,7 @@ const cutOff = 3
 	分割策略：
 	>1.将枢纽元p与最后的元素交换使得枢纽元p离开要被分割的数据段。
 	>2.i从第一个元素开始，j从倒数第二个元素开始
-	
+
 	分割截断要做的是把所有小元素移到数组的左边而把所有大元素移到数组的右边，当然大小是相对枢纽元p。
 	当i在j的左边时，将i右移，移过小于p的元素；当j在i的右边时，将j左移，移过大于p的元素。
 	当移动停止时，i指向一个大元素（大于p），j指向一个小元素（小与p），如果i在j左边，那么将两个元素互换。
@@ -33,34 +33,52 @@ func QuickSort(A []int) {
 	qsort(A, 0, len(A) - 1)
 }
 
+func QuickSort_GO(A []int) {
+	done := make(chan struct{})
+	go qsort_go(A, 0, len(A) - 1, done, 5)
+	<-done
+}
+
 func qsort(A []int, left, right int) {
 	if len(A) <= 1 {
 		return
 	}
 
-	if right - left < cutOff {
+	if right - left >= cutOff {
 		p := median3(A, left, right)
-		i, j := left + 1, right - 2
-		for {
-			for A[i] < p {
-				i++
-			}
-			for A[j] > p {
+		pv := A[p]
+		//i := arrange(A, left+1, right - 1, p)
+		i,j := left, right
+		for i <= j {
+			for j >= p && A[j] > pv {
 				j--
 			}
-			if i < j {
-				A[i], A[j] = A[j], A[i]
-			} else {
-				break
+			if j >= p {
+				A[p] = A[j]
+				p = j
 			}
 
+			for i <= p && A[i] <= pv {
+				i++
+			}
+			if i <= p {
+				A[p] = A[i]
+				p = i
+			}
 		}
-		A[i], A[right - 1] = A[right - 1], A[i]
-		qsort(A, left, i - 1)
-		qsort(A, right + 1, right)
+		A[p] = pv
+		//A[i], A[right-1] = A[right-1], A[i]   // 将i, j 相交点与p交换，这时数组A中，A[i] 左侧的数都比p小，右侧数都比p大
+		if p - left > 1 {
+			qsort(A, left, p - 1)
+		}
+
+		if right - p > 1 {
+			qsort(A, p + 1, right)
+		}
+
 
 	} else {  // 子集数量太少使用插入排序优化
-		insertsort.InsertSort(A[left: right-left + 1])
+		insertsort.InsertSort(A[left:], right-left+1)
 	}
 
 }
@@ -84,6 +102,71 @@ func median3(A []int, left,right int) int  {
 		A[center], A[right] = A[right], A[center]
 	}
 
-	A[center], A[right - 1] = A[right - 1], A[center]
-	return A[right - 1]
+	//A[center], A[right-1] = A[right-1], A[center]
+	return center
+}
+
+/*
+	并发的快排
+ */
+func qsort_go(A []int, left, right int, done chan struct{}, depth int) {
+	if len(A) <= 1 {
+		done <- struct{}{}
+		return
+	}
+
+	if right - left >= cutOff {
+		depth--
+		p := median3(A, left, right)
+		pv := A[p]
+		//i := arrange(A, left+1, right - 1, p)
+		i,j := left, right
+		for i <= j {
+			for j >= p && A[j] > pv {
+				j--
+			}
+			if j >= p {
+				A[p] = A[j]
+				p = j
+			}
+
+			for i <= p && A[i] <= pv {
+				i++
+			}
+			if i <= p {
+				A[p] = A[i]
+				p = i
+			}
+		}
+		A[p] = pv
+		//A[i], A[right-1] = A[right-1], A[i]   // 将i, j 相交点与p交换，这时数组A中，A[i] 左侧的数都比p小，右侧数都比p大
+
+		if  depth > 0 {
+			childDone := make(chan struct{}, 2)
+			if p - left > 1 {
+				go qsort_go(A, left, i-1, childDone, depth)
+			} else {
+				childDone <- struct{}{}
+			}
+			if right - p > 1 {
+				go qsort_go(A, i+1, right, childDone, depth)
+			} else {
+				childDone <- struct{}{}
+			}
+			<- childDone
+			<- childDone
+		} else {
+			if p - left > 1 {
+				qsort(A, left, p - 1)
+			}
+
+			if right - p > 1 {
+				qsort(A, p + 1, right)
+			}
+		}
+
+	} else {
+		insertsort.InsertSort(A[left:], right-left+1)
+	}
+	done <- struct{}{}
 }

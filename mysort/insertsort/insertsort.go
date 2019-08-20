@@ -7,8 +7,8 @@ package insertsort
 	排序次数 1 + 2 + 3 + ... + (N - 1) = (1 + N - 1)*(N - 1)/2 = N*(N-1)/2 = θ(N²)
 	如果已经预先排序，运行时间为O(N)
 */
-func InsertSort(A []int) {
-	for p := 1; p < len(A); p++ {
+func InsertSort(A []int, N int) {
+	for p := 1; p < N; p++ {
 		tmp := A[p]
 		var j int
 		for  j = p; j > 0 && A[j - 1] > tmp; j-- {
