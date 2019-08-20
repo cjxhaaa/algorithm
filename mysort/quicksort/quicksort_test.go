@@ -9,6 +9,15 @@ import (
 	"time"
 )
 
+func TestQuickSort3(t *testing.T) {
+	A := []int{3,2,6,1,7,0,3,4,6}
+	QuickSort2(A)
+	if !reflect.DeepEqual(A, []int{0,1,2,3,3,4,6,6,7}) {
+		fmt.Println(A)
+		log.Fatal("A排序出错了哦")
+	}
+	fmt.Println(A)
+}
 
 func TestQuickSort2(t *testing.T) {
 	A := []int{3,2,6,1,7,0,3,4,6}
@@ -79,9 +88,49 @@ func TestQuickSort(t *testing.T) {
 }
 
 func BenchmarkQuickSort(b *testing.B) {
-	A := []int{3,2,6,1,7,0,3,4,6}
+	//A := []int{3,2,6,1,7,0,3,4,6,0,12,33,44,55,22,24,15,63,24}
+	rand.Seed(time.Now().UnixNano())
+	num := 100000
+	testData1 := make([]int, 0, num)
+	for i := 0; i < num; i++ {
+		val := rand.Intn(200000000)
+		testData1 = append(testData1, val)
+	}
+	fmt.Println("GO")
 	b.ResetTimer()
 	for n :=0; n < b.N; n++ {
-		QuickSort(A)
+		QuickSort(testData1)
+	}
+}
+
+func BenchmarkQuickSort2(b *testing.B) {
+	//A := []int{3,2,6,1,7,0,3,4,6,0,12,33,44,55,22,24,15,63,24}
+	rand.Seed(time.Now().UnixNano())
+	num := 100000
+	testData1 := make([]int, 0, num)
+	for i := 0; i < num; i++ {
+		val := rand.Intn(200000000)
+		testData1 = append(testData1, val)
+	}
+	fmt.Println("GO")
+	b.ResetTimer()
+	for n :=0; n < b.N; n++ {
+		QuickSort2(testData1)
+	}
+}
+
+func BenchmarkQuickSort3(b *testing.B) {
+	//A := []int{3,2,6,1,7,0,3,4,6,0,12,33,44,55,22,24,15,63,24}
+	rand.Seed(time.Now().UnixNano())
+	num := 100000
+	testData1 := make([]int, 0, num)
+	for i := 0; i < num; i++ {
+		val := rand.Intn(200000000)
+		testData1 = append(testData1, val)
+	}
+	fmt.Println("GO")
+	b.ResetTimer()
+	for n :=0; n < b.N; n++ {
+		QuickSort_GO(testData1)
 	}
 }
