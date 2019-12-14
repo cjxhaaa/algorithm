@@ -1,7 +1,7 @@
 package quicksort
 
 import (
-	"algorithm/mysort/insertsort"
+	"algorithm/sortMethod/insertsort"
 )
 
 const cutOff = 3
