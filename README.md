@@ -24,7 +24,7 @@ PASS
 goos: darwin
 goarch: amd64
 pkg: algorithm/sortMethod/mergesort
-BenchmarkMergeSort-4   	       2	 572354311 ns/op
+BenchmarkMergeSort-4   	      10	 152582040 ns/op
 PASS
 
 ```

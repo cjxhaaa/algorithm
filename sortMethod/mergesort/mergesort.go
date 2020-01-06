@@ -12,14 +12,14 @@ package mergesort
 func merge(A []int, l, m, r int) {
 	//fmt.Println("start merge:")
 	//fmt.Println("l:", l,"m:", m,"r:",r)
-	var L []int
-	var R []int
-	for _, v := range A[l:m] {
-		L = append(L, v)
+	var L = make([]int,m-l)
+	var R = make([]int,r-m)
+	for index, v := range A[l:m] {
+		L[index] = v
 	}
 	//fmt.Println("L:", L)
-	for _, v := range A[m:r] {
-		R = append(R, v)
+	for index, v := range A[m:r] {
+		R[index] = v
 	}
 	//fmt.Println("R:", R)
 
