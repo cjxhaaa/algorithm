@@ -1,6 +1,5 @@
 package mergesort
 
-
 /*
 	归并排序以O(NlogN)最坏运行时间运行，而所用的比较次数几乎是最优的。
 	这个算法的基本操作是合并两个已排序的表，因为这两个表是已经排序的，所以若将输出放到第三个表中时则该算法可用过对输入数据一趟排序来完成。
@@ -10,6 +9,59 @@ package mergesort
 
 */
 
-func MergeSort(A []int) {
+func merge(A []int, l, m, r int) {
+	//fmt.Println("start merge:")
+	//fmt.Println("l:", l,"m:", m,"r:",r)
+	var L []int
+	var R []int
+	for _, v := range A[l:m] {
+		L = append(L, v)
+	}
+	//fmt.Println("L:", L)
+	for _, v := range A[m:r] {
+		R = append(R, v)
+	}
+	//fmt.Println("R:", R)
 
+	var i = 0
+	var j = 0
+
+	for k:= l;k<r;k+=1 {
+		//fmt.Println("i:",i,"j:",j,"k:",k)
+		if i >= len(L) {
+			for j < len(R) {
+
+				A[k] = R[j]
+				j+=1
+				k+=1
+			}
+			break
+		} else if j >= len(R) {
+			for i < len(L) {
+				A[k] = L[i]
+				i+=1
+				k+=1
+			}
+			break
+		} else if L[i] <= R[j] {
+			A[k] = L[i]
+			i+=1
+		} else {
+			A[k] = R[j]
+			j+=1
+		}
+	}
+	//fmt.Println(A)
 }
+
+func MergeSort(A []int, l, r int) {
+	if l < r && r-l > 1 {
+		m := (l + r) /2
+		MergeSort(A, l , m)
+		MergeSort(A, m, r)
+		merge(A, l, m, r)
+	}
+}
+
+
+

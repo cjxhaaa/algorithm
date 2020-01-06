@@ -2,8 +2,10 @@ package heapsort
 
 import (
 	"log"
+	"math/rand"
 	"reflect"
 	"testing"
+	"time"
 )
 
 func TestHeapsort(t *testing.T) {
@@ -14,8 +16,16 @@ func TestHeapsort(t *testing.T) {
 	}
 }
 
+var test_num = 1000000
+
 func BenchmarkHeapsort(b *testing.B) {
-	A := []int{3,2,6,1,7,0,3,4,6}
+	rand.Seed(time.Now().UnixNano())
+	num := test_num
+	A := make([]int, 0, num)
+	for i := 0; i < num; i++ {
+		val := rand.Intn(200000000)
+		A = append(A, val)
+	}
 	b.ResetTimer()
 	for n :=0; n < b.N; n++ {
 		HeapSort(A)

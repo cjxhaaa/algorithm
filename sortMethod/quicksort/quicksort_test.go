@@ -88,7 +88,7 @@ func TestQuickSort(t *testing.T) {
 }
 
 
-var test_num = 100
+var test_num = 1000000
 
 func BenchmarkQuickSort(b *testing.B) {
 	//A := []int{3,2,6,1,7,0,3,4,6,0,12,33,44,55,22,24,15,63,24}
