@@ -54,23 +54,91 @@ type Node struct {
 	P      *Node
 }
 
+var Nil *Node
+
 // 左旋
 func LeftRotate(root, x *Node) {
 	y := x.Right       // 找到右结点y
 	x.Right = y.Left
-	if y.Left != nil {   // y有左孩子，将左孩子给x
+	if y.Left != Nil {   // y有左孩子，将左孩子给x
 		y.Left.P = x
 	}
 	y.P = x.P          // 将y父结点变为原x父结点
-	if x.P == nil{     // x为根结点的情况
+	if x.P == Nil{     // x为根结点的情况
+		root = y
+	} else if x == x.P.Left {  // 如果x原来是左孩子
+		x.P.Left = y
+	} else {
+		x.P.Right = y          // 如果x原来是右孩子
+	}
+	y.Left = x                 // 将x变为y左孩子
+	x.P = y
+}
+
+// 右旋
+func RightRotate(root, x *Node) {
+	y := x.Left
+	x.Left = y.Right
+	if y.Right != Nil {
+		y.Right.P = x
+	}
+	y.P = x.P
+	if x.P == Nil {
 		root = y
 	} else if x == x.P.Left {
 		x.P.Left = y
 	} else {
 		x.P.Right = y
 	}
-	y.Left = x
+	y.Right = x
 	x.P = y
+}
+
+func RBInsert(root, z *Node) {
+	y := Nil
+	x := root
+	for x != Nil {
+		y = x
+		if z.Key < x.Key {
+			x = x.Left
+		} else {
+			x = x.Right
+		}
+	}
+	z.P = y
+	if y == Nil {
+		root = z
+	} else if z.Key < y.Key {
+		y.Left = z
+	} else {
+		y.Right = z
+	}
+	z.Left = Nil
+	z.Right = Nil
+	z.Color = Red
+}
+
+
+// todo:有空再写，情况太多
+func RBInsertFixup(root, z *Node) {
+	for z.P.Color == Red {
+		if z.P == z.P.P.Left {
+			y := z.P.P.Right
+			if y.Color == Red {
+				z.P.Color = Black
+				y.Color = Black
+				z.P.P.Color = Red
+				z = z.P.P
+			} else if z == z.P.Right {
+				z = z.P
+				LeftRotate(root, z)
+			}
+			z.P.Color = Black
+			z.P.P.Color = Red
+			RightRotate(root, z.P.P)
+		}
+	}
+	root.Color = Black
 
 }
 
