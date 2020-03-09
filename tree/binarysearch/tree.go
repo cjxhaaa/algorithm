@@ -137,10 +137,12 @@ func TreeInsert(root, z *Node) {
 	z.P = y
 	if y == nil {
 		root = z
-	} else if z.Value < y.Value {
-		y.Left = z
 	} else {
-		y.Right = z
+		if z.Value < y.Value {
+			y.Left = z
+		} else {
+			y.Right = z
+		}
 	}
 }
 

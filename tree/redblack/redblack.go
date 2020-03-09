@@ -1,5 +1,6 @@
 package redblack
 
+import "fmt"
 
 // 参考《算法导论》第13章
 /*
@@ -41,8 +42,8 @@ n >= 2^(h/2)-1
 type Color int
 
 const (
-	Red Color = iota + 1
-	Black
+	Black Color = iota
+	Red
 )
 
 
@@ -54,50 +55,91 @@ type Node struct {
 	P      *Node
 }
 
-var Nil *Node
+type Tree struct {
+	Root *Node
+	Nil  *Node
+}
+
+var Nil = &Node{Color:Black}
+
+// 先序遍历
+func PreorderTreeWalk(x *Node) {
+	if x != nil {
+		fmt.Println(x.Key,"*",x.Color)
+		PreorderTreeWalk(x.Left)
+		PreorderTreeWalk(x.Right)
+	}
+}
+
+
+// 中序遍历
+func InorderTreeWalk(x *Node) {
+	if x != nil {
+		InorderTreeWalk(x.Left)
+		fmt.Println(x.Key)
+		//fmt.Println(x.Key,"*",x.Color)
+		InorderTreeWalk(x.Right)
+	}
+}
+
+// 后序遍历
+func PostorderTreeWalk(x *Node) {
+	if x != nil {
+		PostorderTreeWalk(x.Left)
+		PostorderTreeWalk(x.Right)
+		fmt.Println(x.Key,"*",x.Color)
+	}
+}
 
 // 左旋
-func LeftRotate(root, x *Node) {
+func (t *Tree)LeftRotate(x *Node) {
 	y := x.Right       // 找到右结点y
 	x.Right = y.Left
-	if y.Left != Nil {   // y有左孩子，将左孩子给x
+	if y.Left != t.Nil {
 		y.Left.P = x
 	}
+
 	y.P = x.P          // 将y父结点变为原x父结点
-	if x.P == Nil{     // x为根结点的情况
-		root = y
-	} else if x == x.P.Left {  // 如果x原来是左孩子
-		x.P.Left = y
+	if x.P == t.Nil{     // x为根结点的情况
+		t.Root = y
 	} else {
-		x.P.Right = y          // 如果x原来是右孩子
+		if x == x.P.Left {  // 如果x原来是左孩子
+			x.P.Left = y
+		} else {
+			x.P.Right = y          // 如果x原来是右孩子
+		}
 	}
 	y.Left = x                 // 将x变为y左孩子
 	x.P = y
 }
 
 // 右旋
-func RightRotate(root, x *Node) {
+func (t *Tree)RightRotate(x *Node) {
 	y := x.Left
 	x.Left = y.Right
-	if y.Right != Nil {
+	if y.Right != t.Nil {
+
 		y.Right.P = x
 	}
+
 	y.P = x.P
-	if x.P == Nil {
-		root = y
-	} else if x == x.P.Left {
-		x.P.Left = y
+	if x.P == t.Nil {
+		t.Root = y
 	} else {
-		x.P.Right = y
+		if x == x.P.Left {
+			x.P.Left = y
+		} else {
+			x.P.Right = y
+		}
 	}
 	y.Right = x
 	x.P = y
 }
 
-func RBInsert(root, z *Node) {
-	y := Nil
-	x := root
-	for x != Nil {
+func (t *Tree)RBInsert(z *Node) {
+	y := t.Nil
+	x := t.Root
+	for x != t.Nil {     // 正常的遍历找到结点该插入的位置
 		y = x
 		if z.Key < x.Key {
 			x = x.Left
@@ -105,40 +147,63 @@ func RBInsert(root, z *Node) {
 			x = x.Right
 		}
 	}
-	z.P = y
-	if y == Nil {
-		root = z
-	} else if z.Key < y.Key {
-		y.Left = z
+	z.P = y    // 找到合适的y后，y成为z的父亲
+	if y == Nil {    // 如果y为空，即空树，则z直接是根结点
+		t.Root = z
 	} else {
-		y.Right = z
+		if z.Key < y.Key {    // 判断z是成为左孩子还是右孩子
+			y.Left = z
+		} else {
+			y.Right = z
+		}
 	}
-	z.Left = Nil
+	z.Left = Nil    // 因为z是新插入的，他的孩子肯定都是空
 	z.Right = Nil
-	z.Color = Red
+	z.Color = Red   // 抹红，以满足红黑性质5。因为插入之前所有根至外部结点路径上黑色结点数目相同，如果插入黑色，肯定导致黑色数目不同。所以先将其置为红色，方便后续调整
+	t.RBInsertFixup(z)
 }
 
 
-// todo:有空再写，情况太多
-func RBInsertFixup(root, z *Node) {
-	for z.P.Color == Red {
-		if z.P == z.P.P.Left {
-			y := z.P.P.Right
+// 插入后因为多了一个红色结点，可能会破坏红黑性质，进行修复
+func (t *Tree)RBInsertFixup(z *Node) {
+
+	for z.P.Color == Red {  // 插入的z一开始已经被抹红了，所以要判断他破坏了哪些红黑性质，并进行相应修复
+
+		if z.P == z.P.P.Left {   // 当z的父亲是z爷爷的左孩子时
+			y := z.P.P.Right      // 找到z的叔叔结点y
+			if y.Color == Red {     // 如果y为红色，将z父亲和叔叔抹黑，将z爷爷抹红。保持红黑性质的同时，z指针上升
+				z.P.Color = Black
+				y.Color = Black
+				z.P.P.Color = Red
+				z = z.P.P
+			} else {  // 当叔叔结点为黑色情况，为了保持红黑性质，进行旋转修复
+				if z == z.P.Right {
+					z = z.P
+					t.LeftRotate(z)
+				}
+				z.P.Color = Black
+				z.P.P.Color = Red
+				t.RightRotate(z.P.P)
+			}
+
+		} else if z.P == z.P.P.Right {
+			y := z.P.P.Left
 			if y.Color == Red {
 				z.P.Color = Black
 				y.Color = Black
 				z.P.P.Color = Red
 				z = z.P.P
-			} else if z == z.P.Right {
-				z = z.P
-				LeftRotate(root, z)
+			} else {
+				if z == z.P.Left {
+					z = z.P
+					t.RightRotate(z)
+				}
+				z.P.Color = Black
+				z.P.P.Color = Red
+				t.LeftRotate(z.P.P)
 			}
-			z.P.Color = Black
-			z.P.P.Color = Red
-			RightRotate(root, z.P.P)
 		}
 	}
-	root.Color = Black
-
+	t.Root.Color = Black
 }
 
