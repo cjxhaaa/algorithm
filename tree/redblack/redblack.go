@@ -1,7 +1,5 @@
 package redblack
 
-import "fmt"
-
 // 参考《算法导论》第13章
 /*
 一颗红黑树是满足红黑性质的二叉搜索树：
@@ -62,33 +60,15 @@ type Tree struct {
 
 var Nil = &Node{Color:Black}
 
-// 先序遍历
-func PreorderTreeWalk(x *Node) {
-	if x != nil {
-		fmt.Println(x.Key,"*",x.Color)
-		PreorderTreeWalk(x.Left)
-		PreorderTreeWalk(x.Right)
-	}
+func NewRBTree() *Tree {
+	return &Tree{Root:Nil, Nil:Nil}
 }
 
-
-// 中序遍历
-func InorderTreeWalk(x *Node) {
-	if x != nil {
-		InorderTreeWalk(x.Left)
-		fmt.Println(x.Key)
-		//fmt.Println(x.Key,"*",x.Color)
-		InorderTreeWalk(x.Right)
+func TreeMininum(x *Node) *Node {
+	if x.Left != Nil {
+		return TreeMininum(x.Left)
 	}
-}
-
-// 后序遍历
-func PostorderTreeWalk(x *Node) {
-	if x != nil {
-		PostorderTreeWalk(x.Left)
-		PostorderTreeWalk(x.Right)
-		fmt.Println(x.Key,"*",x.Color)
-	}
+	return x
 }
 
 // 左旋
@@ -136,7 +116,7 @@ func (t *Tree)RightRotate(x *Node) {
 	x.P = y
 }
 
-func (t *Tree)RBInsert(z *Node) {
+func (t *Tree)RBInsert(z *Node) *Node {
 	y := t.Nil
 	x := t.Root
 	for x != t.Nil {     // 正常的遍历找到结点该插入的位置
@@ -161,6 +141,7 @@ func (t *Tree)RBInsert(z *Node) {
 	z.Right = Nil
 	z.Color = Red   // 抹红，以满足红黑性质5。因为插入之前所有根至外部结点路径上黑色结点数目相同，如果插入黑色，肯定导致黑色数目不同。所以先将其置为红色，方便后续调整
 	t.RBInsertFixup(z)
+	return z
 }
 
 
@@ -205,5 +186,105 @@ func (t *Tree)RBInsertFixup(z *Node) {
 		}
 	}
 	t.Root.Color = Black
+}
+
+func (t *Tree)RBTransplant(u, v *Node) {
+	if u.P == t.Nil {   // 根结点时直接替换
+		t.Root = v
+	} else if u == u.P.Left {
+		u.P.Left = v
+	} else {
+		u.P.Right = v
+	}
+	v.P = u.P  // 因为红黑树已经定义了根结点父亲是个nil哨兵，所以不用像普通二叉树那样做个nil判断了，直接指过去就好了
+}
+
+func (t *Tree)RBDelete(z *Node) {
+	var x *Node
+	y := z
+	yOriginalColor := y.Color
+	if z.Left == t.Nil {
+		x = z.Right
+		t.RBTransplant(z, z.Right)
+	} else if z.Right == t.Nil {
+		x = z.Left
+		t.RBTransplant(z, z.Left)
+	} else {
+		y = TreeMininum(z.Right)
+		yOriginalColor = y.Color
+		x = y.Right
+		if y.P == z {
+			x.P = y
+		} else {
+			t.RBTransplant(y, y.Right)
+			y.Right = z.Right
+			y.Right.P = y
+		}
+		t.RBTransplant(z, y)
+		y.Left = z.Left
+		y.Left.P = y
+		y.Color = z.Color
+	}
+
+	if yOriginalColor == Black {
+		t.RBDeleteFixup(x)
+	}
+}
+
+func (t *Tree) RBDeleteFixup(x *Node) {
+	var w *Node
+	for x != t.Root && x.Color == Black {
+		if x == x.P.Left {
+			w = x.P.Right
+			if w.Color == Red {
+				w.Color = Black
+				x.P.Color = Red
+				t.LeftRotate(x.P)
+				w = x.P.Right
+			}
+			if w.Left.Color == Black && w.Right.Color == Black {
+				w.Color = Red
+				x = x.P
+			} else {
+				if w.Right.Color == Black {
+					w.Left.Color = Black
+					w.Color = Red
+					t.RightRotate(w)
+					w = x.P.Right
+				}
+				w.Color = x.P.Color
+				x.P.Color = Black
+				w.Right.Color = Black
+				t.LeftRotate(x.P)
+				x = t.Root
+			}
+		} else {
+			w = x.P.Left
+			if w.Color == Red {
+				w.Color = Black
+				x.P.Color = Red
+				t.RightRotate(x.P)
+				w = x.P.Left
+			}
+			if w.Right.Color == Black && w.Left.Color == Black {
+				w.Color = Red
+				x = x.P
+			} else {
+				if w.Left.Color == Black {
+					w.Right.Color = Black
+					w.Color = Red
+					t.LeftRotate(w)
+					w = x.P.Left
+				}
+				w.Color = x.P.Color
+				x.P.Color = Black
+				w.Left.Color = Black
+				t.RightRotate(x.P)
+				x = t.Root
+			}
+		}
+	}
+	x.Color = Black
+
 }
 

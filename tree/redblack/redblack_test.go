@@ -15,7 +15,9 @@ func TestTree(t *testing.T) {
 
 	rbTree.RBInsert(&Node{Key:9})
 
-	rbTree.RBInsert(&Node{Key:1})
+	dd := rbTree.RBInsert(&Node{Key:1})
+	fmt.Println(dd)
 
-	fmt.Println("go")
+	rbTree.RBDelete(dd)
+
 }
